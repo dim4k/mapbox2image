@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapbox2Image</title>
+    <!-- LEAFLET CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+    <!-- LEAFLET JS -->
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
+    <!-- HTML2CANVAS -->
+    <script src="http://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700,900" rel="stylesheet">
+    <!-- VUEJS -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- FILESAVER -->
+    <script src="https://cdn.jsdelivr.net/gh/eligrey/FileSaver.js/src/FileSaver.js"></script>
+    <style type="text/css">
+        body{
+            -webkit-font-smoothing : antialiased;
+            background-color: #eee;
+            font-family: 'Montserrat', sans-serif;
+        }
+        #render{
+            zoom: 0.1;
+        }
+        #frame{
+            pointer-events: none;
+            position:relative;
+            margin:auto;
+            background-color: transparent;
+            width: 5600px;
+            height: 7600px;
+        }
+        #map{
+            pointer-events: auto;
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+        }
+        #realy-outer{
+            pointer-events: none;
+            margin:0;
+            position:relative;
+            height: 7000px;
+            border: 300px solid #fff;
+        }
+        #outer{
+            pointer-events: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+            border: 18px solid #000;
+        }
+        #central{
+            pointer-events: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+            border: 35px solid #fff;
+        }
+        #inner{
+            pointer-events: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+            border: 35px solid #000;
+        }
+        #text-box{
+            -webkit-font-smoothing : antialiased;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%,rgba(255,255,255,1) 100%);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            position: absolute;
+            height: 1500px;
+            padding-top: 600px;
+            z-index: 1000;
+            text-align: center;
+        }
+        #city{
+            font-size: 430px;
+            font-weight: 700;
+            letter-spacing: 50px;
+            text-indent: 50px;
+        }
+        #country{
+            font-size: 200px;
+            font-weight: 400;
+            letter-spacing: 70px;
+            text-indent: 70px;
+            margin: 0 0 50px 0;
+        }
+        #coords{
+            font-size: 160px;
+            font-weight: 300;
+            text-indent: 12px;
+            letter-spacing: 12px;
+        }
+        .black-bar{
+            letter-spacing: 0;
+        }
+        #setting-bloc{
+            background-color: #fff;
+            position:fixed;
+            border: 2px solid #000;
+            border-radius: 3px;
+            margin: 20px;
+            padding: 20px;
+        }
+        #setting-bloc h3{
+            text-align: center;
+            margin-top: 5px;
+        }
+        tr>td{
+            padding-bottom: 5px;
+        }
+        #download{
+            font-size: 12px;
+            font-weight: 700;
+            margin: 50px auto 0 auto;
+            border-radius: 5px;
+            background-color: white;
+            text-align: center;
+            border: 1px solid #000;
+            padding: 5px 30px;
+            width: 100px;
+            cursor: pointer;
+        }
+        #download:hover{
+            background-color: #eeeeee;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="setting-bloc">
+            <H3>SETTINGS</H3>
+            <table>
+                <tr>
+                    <td>City :</td> <td>
+                    <input v-model="city"></td>
+                </tr>
+                <tr>
+                    <td>Country :</td> <td>
+                    <input v-model="country"></td>
+                </tr>
+                <tr>
+                    <td>Lat :</td>
+                    <td><input v-model="lat" v-on:change="updatePosition"></td>
+                </tr>
+                <tr>
+                    <td>Lng :</td>
+                    <td><input v-model="lng" v-on:change="updatePosition"></td>
+                </tr>
+                <tr>
+                    <td>Zoom :</td>
+                    <td><input type="range" min="10" max="16" step="0.1" v-model="zoom" v-on:change="updatePosition"></td>
+                </tr>
+            </table>
+            <div id="download" v-on:click="downloadImage">DOWNLOAD</div> <br />
+        </div>
+        <div id="render">
+            <div id="frame">
+                <div id="realy-outer">
+                    <div id="outer">
+                        <div id="central">
+                            <div id="inner">
+                                <div v-on:click="updateCoords" id="map">
+                                    <div id="text-box">
+                                        <div id="city">
+                                            {{ city }}
+                                        </div>
+                                        <div id="country">
+                                            <span class="black-bar b-left">─────&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>{{ countryFirstLetters }}<span class="black-bar">{{ countryLastLetter }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;─────</span>
+                                        </div>
+                                        <div id="coords">
+                                            {{ coords }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        new Vue({
+            el: '#main',
+            data: {
+                map: null,
+                city: 'PARIS',
+                country: 'FRANCE',
+                lat: null,
+                lng: null,
+                coords: null,
+                zoom: null,
+                mymap: null,
+            },
+            computed: {
+                countryFirstLetters: function() {
+                    return this.country.substring(0, this.country.length - 1);
+                },
+                countryLastLetter: function() {
+                    return this.country.slice(-1);
+                },
+            },
+            mounted() {
+                this.initMap();
+                this.updateCoords();
+            },
+            methods: {
+                convertDMS(lat, lng) {
+                    let LatCardinal = (lat > 0) ? "°N" : "°S";
+                    let LngCardinal = (lng > 0) ? "°E" : "°W";
+
+                    return Number(lat.toFixed(4)) +  LatCardinal + " " + Number(lng.toFixed(4)) + LngCardinal;
+                },
+                updateCoords() {
+                    let lat = this.mymap.getCenter().lat;
+                    let lng = this.mymap.getCenter().lng;
+                    this.coords = this.convertDMS(lat, lng);
+                    this.lat = lat;
+                    this.lng = lng;
+                },
+                updatePosition() {
+                    this.mymap.setView([this.lat, this.lng], this.zoom);
+                },
+                initMap() {
+                    this.lat = 48.855;
+                    this.lng = 2.341;
+                    this.zoom = 15.5;
+
+                    this.mymap = L.map('map', { zoomControl:false, attributionControl: false, renderer: L.svg(), wheelPxPerZoomLevel: 30 }).setView([this.lat,this.lng], this.zoom);
+
+                    L.tileLayer('https://api.mapbox.com/styles/v1/dim4k/cjkwc7068348v2rqmqfalv39t/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGltNGsiLCJhIjoiY2pqcGZwYjBmM2M4eDNwcXNqYmI4YXpoMiJ9.lhT-H2kZQMegjkVhzCc7Ww', {
+                    }).addTo(this.mymap);
+                },
+                downloadImage() {
+                    let cityDown = this.city;
+                    let countryDown = this.country;
+                    document.getElementById("map").style.zIndex = '-2000';
+                    html2canvas(document.querySelector("#frame"), {
+                        allowTaint: false,
+                        useCORS: true,
+                        async: false,
+                        imageTimeout: 10000,
+                    }).then(canvas => {
+                        canvas.toBlob(function(blob) {
+                            // Generate file download
+                            window.saveAs(blob, "MAP-" + cityDown + "-" + countryDown + ".png");
+                        });
+                        document.getElementById("map").style.zIndex = '0';
+                    });
+                },
+            },
+        })
+    </script>
+</body>
+</html>

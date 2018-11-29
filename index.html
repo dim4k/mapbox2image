@@ -264,7 +264,10 @@
                     this.mymap.setView([this.lat, this.lng], this.zoom);
                 },
                 initMap() {
+                    let vueData = this;
+
                     if (this.mymap) {
+                        this.mymap.stopLocate();
                         this.mymap.remove();
                     }
                     if (this.accessToken.length >= this.accessTokenMinChar) {
@@ -280,7 +283,13 @@
                             renderer: L.svg(),
                             scrollWheelZoom: false
                         }).setView([this.lat, this.lng], this.zoom);
-                        L.tileLayer('https://api.mapbox.com/styles/v1/wiwi56/cjp2gez5g23g12rqax6604y48/tiles/256/{z}/{x}/{y}?access_token=' + this.accessToken, {}).addTo(this.mymap);
+                        let tileLayer = L.tileLayer('https://api.mapbox.com/styles/v1/wiwi56/cjp2gez5g23g12rqax6604y48/tiles/256/{z}/{x}/{y}?access_token=' + this.accessToken, {}).addTo(this.mymap);
+
+                        tileLayer.on('tileerror', function(error, tile) {
+                            vueData.country = null;
+                            vueData.coords = null;
+                            vueData.city = 'Bad Access Token';
+                        });
 
                         this.updateCoords();
                     }

@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700,900" rel="stylesheet">
     <!-- VUEJS -->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- VUE-RESOURCE -->
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
     <!-- FILESAVER -->
     <script src="https://cdn.jsdelivr.net/gh/eligrey/FileSaver.js/src/FileSaver.js"></script>
     <style type="text/css">
@@ -151,12 +153,20 @@
             <H3>SETTINGS</H3>
             <table>
                 <tr>
-                    <td>City :</td> <td>
-                    <input v-model="city"></td>
+                    <td>Search a city:</td>
+                    <td><input v-model="searchInput" v-on:input="searchNominatim"></td>
                 </tr>
                 <tr>
-                    <td>Country :</td> <td>
-                    <input v-model="country"></td>
+                    <td style="padding-bottom: 20px;"></td>
+                    <td style="padding-bottom: 20px; color: red"> {{ searchError }} </td>
+                </tr>
+                <tr>
+                    <td>City :</td>
+                    <td><input v-model="city"></td>
+                </tr>
+                <tr>
+                    <td>Country :</td>
+                    <td><input v-model="country"></td>
                 </tr>
                 <tr>
                     <td>Lat :</td>
@@ -168,7 +178,7 @@
                 </tr>
                 <tr>
                     <td>Zoom :</td>
-                    <td><input type="range" min="10" max="16" step="0.1" v-model="zoom" v-on:change="updatePosition"></td>
+                    <td><input type="range" min="10" max="16" step="0.1" v-model="zoom" v-on:input="updatePosition"></td>
                 </tr>
             </table>
             <br />
@@ -222,6 +232,8 @@
                 mymap: null,
                 accessToken: '',
                 accessTokenMinChar: 61,
+                searchInput: null,
+                searchError: null,
             },
             computed: {
                 countryFirstLetters: function() {
@@ -264,7 +276,7 @@
                     this.mymap.setView([this.lat, this.lng], this.zoom);
                 },
                 initMap() {
-                    let vueData = this;
+                    let self = this;
 
                     if (this.mymap) {
                         this.mymap.stopLocate();
@@ -286,12 +298,37 @@
                         let tileLayer = L.tileLayer('https://api.mapbox.com/styles/v1/wiwi56/cjp2gez5g23g12rqax6604y48/tiles/256/{z}/{x}/{y}?access_token=' + this.accessToken, {}).addTo(this.mymap);
 
                         tileLayer.on('tileerror', function(error, tile) {
-                            vueData.country = null;
-                            vueData.coords = null;
-                            vueData.city = 'Bad Access Token';
+                            self.country = null;
+                            self.coords = null;
+                            self.city = 'Bad Access Token';
                         });
 
                         this.updateCoords();
+                    }
+                },
+                searchNominatim() {
+                    let self = this;
+                    if (this.searchInput.length >= 5) {
+                        this.$http.get('http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=' + this.searchInput).then(response => {
+                            if (typeof response.body !== 'undefined' && response.body.length > 0) {
+                                let firstResult = response.body[0];
+                                let address = firstResult.address;
+
+                                this.country = address.country;
+                                this.city = address.city;
+                                this.lat = firstResult.lat;
+                                this.lng = firstResult.lon;
+                                this.searchError = null;
+
+                                this.updatePosition();
+                            }
+                        }, response => {
+                            if (response.status === 429) {
+                                this.searchError = 'Search error (Too much request)';
+                            } else {
+                                this.searchError = 'Search error';
+                            }
+                        });
                     }
                 },
                 downloadImage() {

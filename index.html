@@ -140,12 +140,15 @@
         #download:hover{
             background-color: #eeeeee;
         }
+        .access-token{
+            width: 450px;
+        }
     </style>
 </head>
 
 <body>
     <div id="main">
-        <div id="setting-bloc">
+        <div v-if="accessToken.length === 61" id="setting-bloc">
             <H3>SETTINGS</H3>
             <table>
                 <tr>
@@ -169,7 +172,15 @@
                     <td><input type="range" min="10" max="16" step="0.1" v-model="zoom" v-on:change="updatePosition"></td>
                 </tr>
             </table>
+            <br />
+            Mapbox Access Token :
+            <input class="access-token" v-model="accessToken" v-on:keyup="initMap">
             <div id="download" v-on:click="downloadImage">DOWNLOAD</div> <br />
+        </div>
+        <div v-else id="setting-bloc">
+            <H3>SETTINGS</H3>
+            Mapbox Access Token :
+            <input class="access-token" v-model="accessToken" v-on:keyup="initMap">
         </div>
         <div id="render">
             <div id="frame">
@@ -180,7 +191,7 @@
                                 <div v-on:click="updateCoords" id="map">
                                     <div id="text-box">
                                         <div id="city">
-                                            {{ city }}
+                                            {{ city }}<span v-if="accessToken.length !== 61">Access Token Required</span>
                                         </div>
                                         <div id="country">
                                             <span class="black-bar b-left">─────&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>{{ countryFirstLetters }}<span class="black-bar">{{ countryLastLetter }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;─────</span>
@@ -202,25 +213,29 @@
             el: '#main',
             data: {
                 map: null,
-                city: 'PARIS',
-                country: 'FRANCE',
+                accesToken: null,
+                city: null,
+                country: null,
                 lat: null,
                 lng: null,
                 coords: null,
                 zoom: null,
                 mymap: null,
+                accessToken: '',
             },
             computed: {
                 countryFirstLetters: function() {
-                    return this.country.substring(0, this.country.length - 1);
+                    if (this.country !== null) {
+                        return this.country.substring(0, this.country.length - 1);
+                    }
                 },
                 countryLastLetter: function() {
-                    return this.country.slice(-1);
+                    if (this.country !== null) {
+                        return this.country.slice(-1);
+                    }
                 },
             },
             mounted() {
-                this.initMap();
-                this.updateCoords();
             },
             methods: {
                 convertDMS(lat, lng) {
@@ -240,14 +255,26 @@
                     this.mymap.setView([this.lat, this.lng], this.zoom);
                 },
                 initMap() {
-                    this.lat = 48.855;
-                    this.lng = 2.341;
-                    this.zoom = 15.5;
+                    if (this.mymap) {
+                        this.mymap.remove();
+                    }
+                    if (this.accessToken.length === 61) {
+                        this.city = 'PARIS';
+                        this.country = 'FRANCE';
+                        this.lat = 48.8415;
+                        this.lng = 2.34025;
+                        this.zoom = 15;
 
-                    this.mymap = L.map('map', { zoomControl:false, attributionControl: false, renderer: L.svg(), wheelPxPerZoomLevel: 30 }).setView([this.lat,this.lng], this.zoom);
+                        this.mymap = L.map('map', {
+                            zoomControl: false,
+                            attributionControl: false,
+                            renderer: L.svg(),
+                            scrollWheelZoom: false
+                        }).setView([this.lat, this.lng], this.zoom);
+                        L.tileLayer('https://api.mapbox.com/styles/v1/dim4k/cjkwc7068348v2rqmqfalv39t/tiles/256/{z}/{x}/{y}?access_token=' + this.accessToken, {}).addTo(this.mymap);
 
-                    L.tileLayer('https://api.mapbox.com/styles/v1/dim4k/cjkwc7068348v2rqmqfalv39t/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGltNGsiLCJhIjoiY2pqcGZwYjBmM2M4eDNwcXNqYmI4YXpoMiJ9.lhT-H2kZQMegjkVhzCc7Ww', {
-                    }).addTo(this.mymap);
+                        this.updateCoords();
+                    }
                 },
                 downloadImage() {
                     let cityDown = this.city;

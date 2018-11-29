@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Mapbox2Image</title>
@@ -117,6 +117,8 @@
             border-radius: 3px;
             margin: 20px;
             padding: 20px;
+            width: 350px;
+            z-index: 999;
         }
         #setting-bloc h3{
             text-align: center;
@@ -140,15 +142,12 @@
         #download:hover{
             background-color: #eeeeee;
         }
-        .access-token{
-            width: 450px;
-        }
     </style>
 </head>
 
 <body>
     <div id="main">
-        <div v-if="accessToken.length === 61" id="setting-bloc">
+        <div v-if="accessToken.length >= accessTokenMinChar" id="setting-bloc">
             <H3>SETTINGS</H3>
             <table>
                 <tr>
@@ -174,13 +173,13 @@
             </table>
             <br />
             Mapbox Access Token :
-            <input class="access-token" v-model="accessToken" v-on:keyup="initMap">
+            <textarea row="4" cols="30" v-model="accessToken" v-on:keyup="initMap"></textarea>
             <div id="download" v-on:click="downloadImage">DOWNLOAD</div> <br />
         </div>
         <div v-else id="setting-bloc">
             <H3>SETTINGS</H3>
             Mapbox Access Token :
-            <input class="access-token" v-model="accessToken" v-on:keyup="initMap">
+            <textarea row="4" cols="30" v-model="accessToken" v-on:keyup="initMap"></textarea>
         </div>
         <div id="render">
             <div id="frame">
@@ -191,7 +190,7 @@
                                 <div v-on:click="updateCoords" id="map">
                                     <div id="text-box">
                                         <div id="city">
-                                            {{ city }}<span v-if="accessToken.length !== 61">Access Token Required</span>
+                                            {{ mainText }}
                                         </div>
                                         <div id="country">
                                             <span class="black-bar b-left">─────&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>{{ countryFirstLetters }}<span class="black-bar">{{ countryLastLetter }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;─────</span>
@@ -222,6 +221,7 @@
                 zoom: null,
                 mymap: null,
                 accessToken: '',
+                accessTokenMinChar: 61,
             },
             computed: {
                 countryFirstLetters: function() {
@@ -234,6 +234,15 @@
                         return this.country.slice(-1);
                     }
                 },
+                mainText: function() {
+                    if (this.accessToken.length < this.accessTokenMinChar) {
+                        this.country = null;
+                        this.coords = null;
+                        return 'Access Token Required';
+                    } else {
+                        return this.city;
+                    }
+                }
             },
             mounted() {
             },
@@ -258,7 +267,7 @@
                     if (this.mymap) {
                         this.mymap.remove();
                     }
-                    if (this.accessToken.length === 61) {
+                    if (this.accessToken.length >= this.accessTokenMinChar) {
                         this.city = 'PARIS';
                         this.country = 'FRANCE';
                         this.lat = 48.8415;

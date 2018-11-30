@@ -132,7 +132,7 @@
         #download{
             font-size: 12px;
             font-weight: 700;
-            margin: 50px auto 0 auto;
+            margin: 20px auto 0 auto;
             border-radius: 5px;
             background-color: white;
             text-align: center;
@@ -177,19 +177,32 @@
                     <td><input v-model="lng" v-on:change="updatePosition"></td>
                 </tr>
                 <tr>
-                    <td>Zoom :</td>
-                    <td><input type="range" min="10" max="16" step="0.1" v-model="zoom" v-on:input="updatePosition"></td>
+                    <td style="padding-bottom: 30px;">Zoom :</td>
+                    <td style="padding-bottom: 30px;"><input type="range" min="10" max="16" step="0.1" v-model="zoom" v-on:input="updatePosition"></td>
+                </tr>
+                <tr>
+                    <td style="color: #999">MAPBOX</td>
+                </tr>
+                <tr>
+                    <td style="color: #999">User :</td>
+                    <td><input v-model="mapboxUser" v-on:keyup="initMap" style="color: #777"></td>
+                </tr>
+                <tr>
+                    <td style="color: #999">Style :</td>
+                    <td><input v-model="mapboxStyle" v-on:keyup="initMap" style="color: #777"></td>
+                </tr>
+                <tr>
+                    <td style="color: #999">Access Token :</td>
+                    <td><textarea row="4" cols="30" v-model="accessToken" v-on:change="initMap" style="color: #777"></textarea></td>
                 </tr>
             </table>
             <br />
-            Mapbox Access Token :
-            <textarea row="4" cols="30" v-model="accessToken" v-on:keyup="initMap"></textarea>
             <div id="download" v-on:click="downloadImage">DOWNLOAD</div> <br />
         </div>
         <div v-else id="setting-bloc">
             <H3>SETTINGS</H3>
             Mapbox Access Token :
-            <textarea row="4" cols="30" v-model="accessToken" v-on:keyup="initMap"></textarea>
+            <textarea row="4" cols="30" v-model="accessToken" v-on:change="initMap"></textarea>
         </div>
         <div id="render">
             <div id="frame">
@@ -221,19 +234,26 @@
         new Vue({
             el: '#main',
             data: {
-                map: null,
-                accesToken: null,
+                mymap: null,
                 city: null,
                 country: null,
                 lat: null,
                 lng: null,
                 coords: null,
                 zoom: null,
-                mymap: null,
                 accessToken: '',
                 accessTokenMinChar: 61,
                 searchInput: null,
                 searchError: null,
+                mapboxUser: 'wiwi56', //Default Mapbox user
+                mapboxStyle: 'cjp2gez5g23g12rqax6604y48', //Default Mapbox style
+                defaultPosition: {
+                    'city': 'Paris',
+                    'country': 'France',
+                    'lat': 48.8415,
+                    'lng': 2.34025,
+                    'zoom': 15
+                }
             },
             computed: {
                 countryFirstLetters: function() {
@@ -283,11 +303,11 @@
                         this.mymap.remove();
                     }
                     if (this.accessToken.length >= this.accessTokenMinChar) {
-                        this.city = 'PARIS';
-                        this.country = 'FRANCE';
-                        this.lat = 48.8415;
-                        this.lng = 2.34025;
-                        this.zoom = 15;
+                        this.city = (this.city === null) ? this.defaultPosition.city : this.city;
+                        this.country = (this.country === null) ? this.defaultPosition.country : this.country;
+                        this.lat = (this.lat === null) ? this.defaultPosition.lat : this.lat;
+                        this.lng = (this.lng === null) ? this.defaultPosition.lng : this.lng;
+                        this.zoom = (this.zoom === null) ? this.defaultPosition.zoom : this.zoom;
 
                         this.mymap = L.map('map', {
                             zoomControl: false,
@@ -295,8 +315,7 @@
                             renderer: L.svg(),
                             scrollWheelZoom: false
                         }).setView([this.lat, this.lng], this.zoom);
-                        let tileLayer = L.tileLayer('https://api.mapbox.com/styles/v1/wiwi56/cjp2gez5g23g12rqax6604y48/tiles/256/{z}/{x}/{y}?access_token=' + this.accessToken, {}).addTo(this.mymap);
-
+                        let tileLayer = L.tileLayer('https://api.mapbox.com/styles/v1/' + self.mapboxUser + '/' + self.mapboxStyle + '/tiles/256/{z}/{x}/{y}?access_token=' + this.accessToken, {}).addTo(this.mymap);
                         tileLayer.on('tileerror', function(error, tile) {
                             self.country = null;
                             self.coords = null;
@@ -343,7 +362,7 @@
                     }).then(canvas => {
                         canvas.toBlob(function(blob) {
                             // Generate file download
-                            window.saveAs(blob, "MAP-" + cityDown + "-" + countryDown + ".png");
+                            window.saveAs(blob, "mapbox2image-" + cityDown + "-" + countryDown + ".png");
                         });
                         document.getElementById("map").style.zIndex = '0';
                     });

@@ -5,7 +5,7 @@ Mapbox2Image
 
 Requirements
 ----
-* Web browser (not working on Firefox Zoom CSS rendering not working)
+* Web browser (not working on Firefox Zoom CSS rendering is not working)
 
 Use
 ----

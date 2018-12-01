@@ -24,3 +24,7 @@ And copy / paste your access token in the correct field.
 
 #### Enjoy
 Just target your location with the search and move the map according to your preferences, finally press the download button.
+
+About
+----
+This project has been done just to try out some feature of VueJs, the all-in-one page / file is intentional. 

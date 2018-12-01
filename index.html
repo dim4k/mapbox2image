@@ -17,6 +17,8 @@
     <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
     <!-- FILESAVER -->
     <script src="https://cdn.jsdelivr.net/gh/eligrey/FileSaver.js/src/FileSaver.js"></script>
+    <!-- LODASH -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
     <style type="text/css">
         body{
             -webkit-font-smoothing : antialiased;
@@ -153,12 +155,18 @@
             <H3>SETTINGS</H3>
             <table>
                 <tr>
-                    <td>Search a city:</td>
-                    <td><input v-model="searchInput" v-on:input="searchNominatim"></td>
+                    <td colspan="2"><strong>SEARCH</strong></td>
+                </tr>
+                <tr>
+                    <td>City | Place :</td>
+                    <td><input v-model="searchInput" v-on:input="typingSearch = true;"></td>
                 </tr>
                 <tr>
                     <td style="padding-bottom: 20px;"></td>
                     <td style="padding-bottom: 20px; color: red"> {{ searchError }} </td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>MAP LABELS</strong></td>
                 </tr>
                 <tr>
                     <td>City :</td>
@@ -181,7 +189,7 @@
                     <td style="padding-bottom: 30px;"><input type="range" min="10" max="16" step="0.1" v-model="zoom" v-on:input="updatePosition"></td>
                 </tr>
                 <tr>
-                    <td style="color: #999">MAPBOX</td>
+                    <td style="color: #999" colspan="2"><strong>MAPBOX</strong></td>
                 </tr>
                 <tr>
                     <td style="color: #999">User :</td>
@@ -243,6 +251,7 @@
                 zoom: null,
                 accessToken: '',
                 accessTokenMinChar: 61,
+                typingSearch: false,
                 searchInput: null,
                 searchError: null,
                 mapboxUser: 'wiwi56', //Default Mapbox user
@@ -277,6 +286,11 @@
                 }
             },
             mounted() {
+            },
+            watch: {
+                searchInput: _.debounce(function () {
+                    this.searchNominatim();
+                }, 1000)
             },
             methods: {
                 convertDMS(lat, lng) {
@@ -326,29 +340,26 @@
                     }
                 },
                 searchNominatim() {
-                    let self = this;
-                    if (this.searchInput.length >= 5) {
-                        this.$http.get('http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=' + this.searchInput).then(response => {
-                            if (typeof response.body !== 'undefined' && response.body.length > 0) {
-                                let firstResult = response.body[0];
-                                let address = firstResult.address;
+                    this.$http.get('http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=' + this.searchInput).then(response => {
+                        if (typeof response.body !== 'undefined' && response.body.length > 0) {
+                            let firstResult = response.body[0];
+                            let address = firstResult.address;
 
-                                this.country = address.country;
-                                this.city = address.city;
-                                this.lat = firstResult.lat;
-                                this.lng = firstResult.lon;
-                                this.searchError = null;
+                            this.country = address.country;
+                            this.city = address.city;
+                            this.lat = firstResult.lat;
+                            this.lng = firstResult.lon;
+                            this.searchError = null;
 
-                                this.updatePosition();
-                            }
-                        }, response => {
-                            if (response.status === 429) {
-                                this.searchError = 'Search error (Too much request)';
-                            } else {
-                                this.searchError = 'Search error';
-                            }
-                        });
-                    }
+                            this.updatePosition();
+                        }
+                    }, response => {
+                        if (response.status === 429) {
+                            this.searchError = 'Search error (Too much request)';
+                        } else {
+                            this.searchError = 'Search error';
+                        }
+                    });
                 },
                 downloadImage() {
                     let cityDown = this.city;

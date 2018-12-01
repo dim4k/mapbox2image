@@ -27,4 +27,4 @@ Just target your location with the search and move the map according to your pre
 
 About
 ----
-This project has been done just to try out some feature of VueJs, the all-in-one page / file is intentional. 
+This project has been done just to try out some features and have fun with VueJs, the all-in-one page / file is intentional. 

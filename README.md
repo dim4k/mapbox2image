@@ -1,12 +1,11 @@
 Mapbox2Image
 =====
-<p>VueJs</p>
-<p>Generate a high resolution image (poster) of a map with styling from Mapbox.</p>
-![demo-img](4tud99f.jpg)
+
+![demo-img](demo.png)
 
 About
 ----
-This project has been done to try out some features and have fun with Vue2.
+<p>Generate a high resolution image (poster) of a map with styling from Mapbox.</p>
 
 Requirements
 ----
@@ -14,17 +13,17 @@ Requirements
 
 Use
 ----
-#### Clone Github repository
+### Clone Github repository
 ```sh
 git clone https://github.com/dim4k/mapbox2image.git
 ```
 
-#### Run the page
+### Run the page
 Run index.html in your web browser.
 
-#### Add your Mapbox Access Token
+### Add your Mapbox Access Token
 If not already done, create an account on [Mapbox](https://www.mapbox.com/)
 And copy / paste your access token in the correct field.
 
-#### Enjoy
+### Enjoy
 Just target your location with the search and move the map according to your preferences, finally press the download button.

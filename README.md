@@ -2,7 +2,7 @@ Mapbox2Image
 =====
 <p>VueJs</p>
 <p>Generate a high resolution image (poster) of a map with styling from Mapbox.</p>
-![demo-img](https://i.imgur.com/4tud99f.jpg)
+![demo-img](4tud99f.jpg)
 
 About
 ----

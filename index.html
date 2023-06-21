@@ -340,7 +340,7 @@
                     }
                 },
                 searchNominatim() {
-                    this.$http.get('http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=' + this.searchInput).then(response => {
+                    this.$http.get('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=' + this.searchInput).then(response => {
                         if (typeof response.body !== 'undefined' && response.body.length > 0) {
                             let firstResult = response.body[0];
                             let address = firstResult.address;

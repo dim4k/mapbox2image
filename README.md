@@ -9,16 +9,18 @@ About
 
 Requirements
 ----
-* Web browser (not working on Firefox Zoom CSS rendering is not working)
+* Web browser (not working on Firefox Zoom CSS rendering not supported)
 
-Use
+Usage
 ----
-### Clone Github repository
+### Webpage
+Use the github webpage [here](https://dim4k.github.io/mapbox2image/)
+
+*or*
+
 ```sh
 git clone https://github.com/dim4k/mapbox2image.git
 ```
-
-### Run the page
 Run index.html in your web browser.
 
 ### Add your Mapbox Access Token

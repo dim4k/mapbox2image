@@ -5,27 +5,28 @@ Mapbox2Image
 
 About
 ----
-<p>Generate a high resolution image (poster) of a map with styling from Mapbox.</p>
+Generate a high resolution image (poster) of a map with styling from Mapbox.
 
 Requirements
 ----
-* Web browser (not working on Firefox Zoom CSS rendering not supported)
+* Web browser (known issue with Firefox Zoom CSS rendering not supported)
+* Mapbox Access Token (create an account on [Mapbox](https://www.mapbox.com/))
 
 Usage
 ----
 ### Webpage
 Use the github webpage [here](https://dim4k.github.io/mapbox2image/)
 
-*or*
+**or**
 
+In a terminal run :
 ```sh
 git clone https://github.com/dim4k/mapbox2image.git
 ```
-Run index.html in your web browser.
+Open the `index.html` file in your web browser.
 
 ### Add your Mapbox Access Token
-If not already done, create an account on [Mapbox](https://www.mapbox.com/)
-And copy / paste your access token in the correct field.
+Copy / paste your Mapbox access token in the correct field.
 
 ### Enjoy
 Just target your location with the search and move the map according to your preferences, finally press the download button.
